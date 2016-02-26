@@ -1,0 +1,103 @@
+/* nbSensors : the number of sensors
+*  nbSensors must be greater or equal to 4
+*/
+const nbSensors = 4;
+
+/* nbFailures : the maximum number if failures (0, 1, 2 or 3)
+*  nbFailures is use to limit the reachables configurations
+*/
+const nbFailures = NbPannes;
+node Valve
+  state rate : [0,2] : public;
+        stucked : [0,1] : public;
+  init  rate := 0;
+        stucked := 0;
+  event dec, inc;
+  trans stucked=0 |- dec -> rate := rate - 1;
+        stucked=0 |- inc -> rate := rate + 1;
+	stucked=0 & rate=0 |- dec -> ;
+	stucked=0 & rate=2 |- inc -> ;
+        /* a problem may appear */
+        stucked=0 |- dec, inc -> stucked := 1;
+	/* After the stuckedure, the valve is stuck */
+	stucked=1 |- dec, inc -> ;
+edon
+/* A  virtual valse is use by the controller :
+*  - to simulate a perfect valve
+*  - to stop the use of a valve when it is stuck
+*/
+node ValveVirtual
+  state rate : [0,2] : public;
+  /* information given via the controller
+  *  rate different from rateReal means that this valve is stuck.
+  *  so there is no need to use it any more 
+  */
+  flow  rateReal : [0,2];
+  init  rate := 0;
+  event dec, inc;
+  trans rate=rateReal |- dec -> rate := rate - 1;
+        rate=rateReal |- inc -> rate := rate + 1;
+edon
+node Tank
+  state level : [0,nbSensors] : public;
+  init  level := nbSensors/2;
+  flow  input : [0,4];
+        output : [0,2];
+  event time;
+  trans input>output |- time -> level := level + 1;
+        input<output |- time -> level := level - 1;
+        input=output & input=0 |- time -> ;
+        input=output & input>0 |- time -> level := level - 1;
+        input=output & input>0 |- time -> ;
+        input=output & input>0 |- time -> level := level + 1;
+	/* To avoid deadlocks */
+	input>output & level=nbSensors |- time -> ;
+	input<output & level=0 |- time -> ;
+edon
+node SystemNbPannesFNomDuControleur
+  sub   V : Valve[3];
+        T : Tank;
+	C : NomDuControleur;
+  assert T.input = (V[0].rate + V[1].rate);
+         T.output = V[2].rate;
+	 /* les observations du controleurs */
+	 C.rate[0] = V[0].rate;
+	 C.rate[1] = V[1].rate;
+	 C.rate[2] = V[2].rate;
+	 C.level = T.level;
+	 /* to limit the number of failures */
+	 nbFailures >= (V[0].stucked + V[1].stucked + V[2].stucked);
+  state ctrl : bool;
+  init  ctrl := true;
+  event env, cmd;
+  trans ctrl |- cmd -> ctrl := false;
+        ~ctrl |- env -> ctrl := true;
+  sync  <env, T.time>;
+        <C.ddd, cmd, V[0].dec, V[1].dec, V[2].dec>;
+        <C.ddi, cmd, V[0].dec, V[1].dec, V[2].inc>;
+        <C.ddn, cmd, V[0].dec, V[1].dec>;
+        <C.did, cmd, V[0].dec, V[1].inc, V[2].dec>;
+        <C.dii, cmd, V[0].dec, V[1].inc, V[2].inc>;
+        <C.din, cmd, V[0].dec, V[1].inc>;
+        <C.dnd, cmd, V[0].dec, V[2].dec>;
+        <C.dni, cmd, V[0].dec, V[2].inc>;
+        <C.dnn, cmd, V[0].dec>;
+        <C.idd, cmd, V[0].inc, V[1].dec, V[2].dec>;
+        <C.idi, cmd, V[0].inc, V[1].dec, V[2].inc>;
+        <C.idn, cmd, V[0].inc, V[1].dec>;
+        <C.iid, cmd, V[0].inc, V[1].inc, V[2].dec>;
+        <C.iii, cmd, V[0].inc, V[1].inc, V[2].inc>;
+        <C.iin, cmd, V[0].inc, V[1].inc>;
+        <C.ind, cmd, V[0].inc, V[2].dec>;
+        <C.ini, cmd, V[0].inc, V[2].inc>;
+        <C.inn, cmd, V[0].inc>;
+        <C.ndd, cmd, V[1].dec, V[2].dec>;
+        <C.ndi, cmd, V[1].dec, V[2].inc>;
+        <C.ndn, cmd, V[1].dec>;
+        <C.nid, cmd, V[1].inc, V[2].dec>;
+        <C.nii, cmd, V[1].inc, V[2].inc>;
+        <C.nin, cmd, V[1].inc>;
+        <C.nnd, cmd, V[2].dec>;
+        <C.nni, cmd, V[2].inc>;
+        <C.nnn, cmd>;
+edon

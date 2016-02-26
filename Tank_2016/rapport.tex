@@ -1,0 +1,119 @@
+\documentclass[a4paper]{book}
+\usepackage{fullpage}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[francais]{babel}
+
+\usepackage{latexsym}
+\usepackage{fancyhdr}
+\usepackage{makeidx}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{moreverb}
+\usepackage{listings}
+
+\newcommand{\altarica}{{\sc AltaRica}}
+
+\begin{document}
+
+\title{Master 1, Conceptions Formelles\\
+Projet du module \altarica\\
+Synthèse (assistée) d'un contrôleur du niveau d'une cuve}
+
+\date{}
+
+\author{Nom1 \and Nom2 \and Nom3}
+
+\maketitle
+
+\chapter{Le sujet}
+\input{tank}
+
+\chapter{Le rapport}
+\section{Rôle de la constante {\tt nbFailures} (2 points)}
+
+\item La constante nbFailures permet de définir le nombre maximal de pannes pouvant survenir. Elle permet ainsi lors des tests, de limiter le nombre de configuration possibles.\\ La condition \textb{nbFailures >= (V[0].stucked + V[1].stucked + V[2].stucked);} permet d'assurer que le nombre de valves en panne ne peut pas dépasser nbFailures. Elle nous permettra de générer les contrôleurs permettant le nombre de défaillance souhaité.
+
+\section{Résultats avec le contrôleur initial {\tt Ctrl}}
+
+\subsection{Calcul d'un contrôleur}
+
+\subsubsection{Avec 0 défaillance (1 point)}
+\lstinputlisting{Res/System0FCtrl.res}
+\lstinputlisting{Res/System0FCtrl0F1I.res}
+\lstinputlisting{Res/System0FCtrl0F2I.res}
+\lstinputlisting{Res/System0FCtrl0F3I.res}
+\lstinputlisting{Res/System0FCtrl0F4I.res}
+\paragraph{Interprétation des résultats}
+
+\subsubsection{Avec 1 défaillance (1 point)}
+\lstinputlisting{Res/System1FCtrl.res}
+\lstinputlisting{Res/System1FCtrl1F1I.res}
+\lstinputlisting{Res/System1FCtrl1F2I.res}
+\lstinputlisting{Res/System1FCtrl1F3I.res}
+\lstinputlisting{Res/System1FCtrl1F4I.res}
+\paragraph{Interprétation des résultats}
+
+\subsubsection{Avec 2 défaillances (1 point)}
+\lstinputlisting{Res/System2FCtrl.res}
+\lstinputlisting{Res/System2FCtrl2F1I.res}
+\lstinputlisting{Res/System2FCtrl2F2I.res}
+\lstinputlisting{Res/System2FCtrl2F3I.res}
+\lstinputlisting{Res/System2FCtrl2F4I.res}
+\paragraph{Interprétation des résultats}
+
+\subsubsection{Avec 3 défaillances (1 point)}
+\lstinputlisting{Res/System3FCtrl.res}
+\lstinputlisting{Res/System3FCtrl3F1I.res}
+\lstinputlisting{Res/System3FCtrl3F2I.res}
+\lstinputlisting{Res/System3FCtrl3F3I.res}
+\lstinputlisting{Res/System3FCtrl3F4I.res}
+\paragraph{Interprétation des résultats}
+
+\subsection{Calcul des contrôleurs optimisés (2 points)}
+
+\section{Rôle des composants {\tt ValveVirtual} et {\tt CtrlVV} (4 points)}
+Le composant ValveVirtual représente une valve parfaite, qui ne peut pas tomber en panne. Elle n'a pas d'état stucked, les evenements dec et inc provoquent toujours le changement du débit. CtrlVV permet donc d'utiliser un contrôleur qui n'est pas affecté par les pannes des valves. Il pourra servir de point de repère pour la création d'un contrôleur utilisant des valves sujettes aux pannes.
+\section{Résultats avec le contrôleur initial {\tt CtrlVV}}
+
+\subsection{Calcul d'un contrôleur}
+
+\subsubsection{Avec 0 défaillance (1 point)}
+\lstinputlisting{Res/System0FCtrlVV.res}
+\lstinputlisting{Res/System0FCtrlVV0F1I.res}
+\lstinputlisting{Res/System0FCtrlVV0F2I.res}
+\lstinputlisting{Res/System0FCtrlVV0F3I.res}
+\lstinputlisting{Res/System0FCtrlVV0F4I.res}
+\paragraph{Interprétation des résultats}
+
+\subsubsection{Avec 1 défaillance (1 point)}
+\lstinputlisting{Res/System1FCtrlVV.res}
+\lstinputlisting{Res/System1FCtrlVV1F1I.res}
+\lstinputlisting{Res/System1FCtrlVV1F2I.res}
+\lstinputlisting{Res/System1FCtrlVV1F3I.res}
+\lstinputlisting{Res/System1FCtrlVV1F4I.res}
+\paragraph{Interprétation des résultats}
+
+\subsubsection{Avec 2 défaillances (1 point)}
+\lstinputlisting{Res/System2FCtrlVV.res}
+\lstinputlisting{Res/System2FCtrlVV2F1I.res}
+\lstinputlisting{Res/System2FCtrlVV2F2I.res}
+\lstinputlisting{Res/System2FCtrlVV2F3I.res}
+\lstinputlisting{Res/System2FCtrlVV2F4I.res}
+\paragraph{Interprétation des résultats}
+
+\subsubsection{Avec 3 défaillances (1 point)}
+\lstinputlisting{Res/System3FCtrlVV.res}
+\lstinputlisting{Res/System3FCtrlVV3F1I.res}
+\lstinputlisting{Res/System3FCtrlVV3F2I.res}
+\lstinputlisting{Res/System3FCtrlVV3F3I.res}
+\lstinputlisting{Res/System3FCtrlVV3F4I.res}
+\paragraph{Interprétation des résultats}
+
+\subsection{Calcul des contrôleurs optimisés (2 points)}
+
+\section{Conclusion (2 points)}
+
+\end{document}

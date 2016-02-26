@@ -1,0 +1,40 @@
+with SystemNbPannesFNomDuControleur do
+  deadlock := any_s - src(any_t - self);
+  tr_deadlock := trace(initial,any_t,deadlock);
+  notResetable := any_s -coreach(initial,any_t);
+  /* Niveaux critiques et Situations redoutées */
+  NC := any_s & [T.level=0 | T.level=nbSensors];
+  SR := deadlock | NC;
+  /* output */
+  out0 := any_s & [V[2].rate=0];
+  out1 := any_s & [V[2].rate=1];
+  out2 := any_s & [V[2].rate=2];
+  /* systeme d'equation au point fixe
+  * CGagnant = (any_s-SR) & src(CCoupGagnant)
+  * CCoupGagnant = CCoup & rtgt(EPerdant)
+  * EPerdant = (any_s-SR) & (src(ECoupPerdant) - src(ECoupNonPerdant))
+  * ECoupPerdant = ECoup & rtgt(CGgagnant)
+  * ECoupNonPerdant = ECoup & rtgt(any_s - CGagnant)
+  */
+  CCoup := any_t & label cmd;
+  ECoup := any_t & label env;
+  CCoupGagnant -= CCoup & rtgt((any_s-SR) & (src(ECoup & rtgt((any_s-SR) & src(CCoupGagnant))) - src(ECoup & rtgt(any_s - ((any_s-SR) & src(CCoupGagnant))))));
+  CtrlCanControl := rsrc(initial) & CCoupGagnant;
+  SystemControle := reach(initial,CCoupGagnant|ECoup);
+  CCoupGagnantUtile := CCoupGagnant & rsrc(SystemControle);
+  /* Controller projection */
+  /* Syntax and semantic of the "project" command
+  * param 1 : les configurations projetees
+  * param 2 : les transitions projetees
+  *  - arg1 : projection existentielle
+  *  - arg2 : projection universelle
+  * param 3 : nom du noeud AltaRica genere
+  * param 4 : simplification ou non des expressions booleennes
+  * param 5 (optionel) : noeud de la hierarchie servant a la projection
+  */  
+  /* Universal projection is use */
+  project(any_s, (empty_t,CCoupGagnantUtile), 'CtrlInitialNbPannesFNumIter', true,C)
+	> 'Controleurs/CtrlInitialNbPannesFNumIter.alt';
+  /* record results */
+  show(any_s, any_t, deadlock, NC, SR , out0, out1, out2, CtrlCanControl,CCoupGagnant, CCoupGagnantUtile) > 'Res/$NODENAME.res';
+done
